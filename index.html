@@ -8,46 +8,38 @@
 
 <h2>BioChamber Real-Time Dashboard</h2>
 
-<canvas id="sensorChart" width="800" height="400"></canvas>
+<canvas id="chart"></canvas>
 
-<h3>Growth Prediction</h3>
+<h3>Growth Prediction:</h3>
 <p id="growth"></p>
 
-<h3>Control Action</h3>
+<h3>Control Action:</h3>
 <p id="control"></p>
 
 <script>
 async function fetchData() {
-    const response = await fetch('/data');
-    const data = await response.json();
+    const res = await fetch('/data');
+    const data = await res.json();
 
-    const sensors = data.sensors;
-    const prediction = data.prediction;
+    if (!data.sensors || data.sensors.length === 0) return;
 
-    if (!sensors || sensors.length === 0) return;
-
-    const labels = sensors.map((_, i) => i);
-    const pH = sensors.map(d => d.pH);
-    const temp = sensors.map(d => d.Temp);
-    const DO = sensors.map(d => d.DO);
-    const OD = sensors.map(d => d.OD);
+    const labels = data.sensors.map((_, i) => i);
+    const pH = data.sensors.map(d => d.pH);
 
     document.getElementById("growth").innerText =
-        prediction ? prediction.growth_prediction : "No prediction";
+        data.prediction ? data.prediction.growth_prediction : "No Data";
 
     document.getElementById("control").innerText =
-        prediction ? prediction.control_action : "No control action";
+        data.prediction ? data.prediction.control_action : "No Data";
 
-    new Chart(document.getElementById('sensorChart'), {
+    new Chart(document.getElementById("chart"), {
         type: 'line',
         data: {
             labels: labels,
-            datasets: [
-                {label: "pH", data: pH, borderColor: "blue"},
-                {label: "Temp", data: temp, borderColor: "red"},
-                {label: "DO", data: DO, borderColor: "green"},
-                {label: "OD", data: OD, borderColor: "orange"}
-            ]
+            datasets: [{
+                label: "pH",
+                data: pH
+            }]
         }
     });
 }
