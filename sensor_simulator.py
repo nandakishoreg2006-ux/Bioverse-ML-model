@@ -1,13 +1,15 @@
 import time
 import random
-import firebase_admin
-from firebase_admin import credentials, db
+import requests
 
-cred = credentials.Certificate("firebase_key.json")
-firebase_admin.initialize_app(cred, {
-    'databaseURL': 'https://biochamber-52607-default-rtdb.firebaseio.com/'
-})
+FIREBASE_URL = "https://biochamber-52607-default-rtdb.firebaseio.com"
 
+def get_sensors():
+    response = requests.get(f"{FIREBASE_URL}/sensors.json")
+    return response.json()
+
+def update_prediction(data):
+    requests.put(f"{FIREBASE_URL}/prediction.json", json=data)
 while True:
     sensor_data = {
         "pH": round(random.uniform(6.5,7.5),2),
@@ -18,5 +20,6 @@ while True:
 
     db.reference("sensors").push(sensor_data)
     print("Sent:", sensor_data)
+
 
     time.sleep(5)
