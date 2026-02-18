@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BioChamber AI Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<h2>BioChamber Real-Time Dashboard</h2>
+
+<canvas id="sensorChart" width="800" height="400"></canvas>
+
+<h3>Growth Prediction</h3>
+<p id="growth"></p>
+
+<h3>Control Action</h3>
+<p id="control"></p>
+
+<script>
+async function fetchData() {
+    const response = await fetch('/data');
+    const data = await response.json();
+
+    const sensors = data.sensors;
+    const prediction = data.prediction;
+
+    if (!sensors || sensors.length === 0) return;
+
+    const labels = sensors.map((_, i) => i);
+    const pH = sensors.map(d => d.pH);
+    const temp = sensors.map(d => d.Temp);
+    const DO = sensors.map(d => d.DO);
+    const OD = sensors.map(d => d.OD);
+
+    document.getElementById("growth").innerText =
+        prediction ? prediction.growth_prediction : "No prediction";
+
+    document.getElementById("control").innerText =
+        prediction ? prediction.control_action : "No control action";
+
+    new Chart(document.getElementById('sensorChart'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {label: "pH", data: pH, borderColor: "blue"},
+                {label: "Temp", data: temp, borderColor: "red"},
+                {label: "DO", data: DO, borderColor: "green"},
+                {label: "OD", data: OD, borderColor: "orange"}
+            ]
+        }
+    });
+}
+
+setInterval(fetchData, 5000);
+fetchData();
+</script>
+
+</body>
+</html>
