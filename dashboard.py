@@ -1,16 +1,9 @@
-# dashboard.py
-
 from flask import Flask, render_template, jsonify
-import firebase_admin
-from firebase_admin import credentials, db
+import requests
 
 app = Flask(__name__)
 
-# Initialize Firebase (only once)
-cred = credentials.Certificate("firebase_key.json")
-firebase_admin.initialize_app(cred, {
-    'databaseURL': 'https://biochamber-52607-default-rtdb.firebaseio.com/'
-})
+FIREBASE_URL = "https://biochamber-52607-default-rtdb.firebaseio.com"
 
 @app.route("/")
 def index():
@@ -18,8 +11,8 @@ def index():
 
 @app.route("/data")
 def get_data():
-    sensors = db.reference("sensors").get()
-    prediction = db.reference("prediction").get()
+    sensors = requests.get(f"{FIREBASE_URL}/sensors.json").json()
+    prediction = requests.get(f"{FIREBASE_URL}/prediction.json").json()
 
     sensor_list = list(sensors.values())[-20:] if sensors else []
 
